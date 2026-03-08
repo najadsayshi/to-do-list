@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import SQLModel,Session, select
 from db import engine
+from auth import create_token
 from models import User,UserCreate, UserRead, UserLogin
 app = FastAPI()
 
@@ -48,6 +49,11 @@ async def login(user: UserLogin, db : Session = Depends(create_session)):
         raise HTTPException(status_code=400, detail="Invalid Credentials," \
         "either Email or Password")
 
+
+    access_token = create_token(db_user.id,db_user.name)
+    
     return {
-        "message" : "Logged in Succesfully"
+        "access_token ": access_token
     }
+
+
