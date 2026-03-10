@@ -84,7 +84,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         payload = verify_token(token)
 
         if payload is None:
-            raise HTTPException(stauts_code=401, detail="Invalid token")
+            raise HTTPException(status_code=401, detail="Invalid token")
         
         user_id = payload["sub"]
 
