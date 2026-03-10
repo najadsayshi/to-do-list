@@ -165,22 +165,21 @@ async def update_todo(
 
 
 @app.delete("/todos/{todo_id}")
-async def deleteTodo(
-    todo_id : int,
-    todo : TodoCreate,
-    current_user : User = Depends(get_current_user),
-    db : Session = Depends(create_session)
+async def delete_todo(
+    todo_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(create_session)
 ):
-    
-    statement = select(Todo).where(todo_id == Todo.id)
+
+    statement = select(Todo).where(Todo.id == todo_id)
     db_todo = db.exec(statement).first()
 
     if not db_todo:
-        raise HTTPException(status_code=404,detail="No such To do list")
-    
+        raise HTTPException(status_code=404, detail="Todo not found")
+
     if db_todo.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail = "No authorization babes")
-    
+        raise HTTPException(status_code=403, detail="Not authorized")
+
     db.delete(db_todo)
     db.commit()
 
