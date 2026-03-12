@@ -13,18 +13,18 @@ class User(SQLModel, table = True):
     password : str
     
 
-class UserCreate(SQLModel):
+class UserCreate(BaseModel):
     name : str
     email : str
     password : str
     
 
-class UserRead(SQLModel):
+class UserRead(BaseModel):
     name : str
     email : str
 
 
-class UserLogin(SQLModel):
+class UserLogin(BaseModel):
     email : str
     password : str
 
@@ -49,13 +49,13 @@ class Todo(SQLModel, table = True):
     owner_id : int = Field(foreign_key="user.id")
 
 
-class TodoCreate(SQLModel):
+class TodoCreate(BaseModel):
     description : str
     due_date : Optional[datetime] = None
     priority : Priority = Priority.low  
 
 
-class TodoRead(SQLModel):
+class TodoRead(BaseModel):
     id : int
     description : str
     completed : bool
@@ -64,7 +64,7 @@ class TodoRead(SQLModel):
     priority : Priority
 
 
-class TodoUpdate(SQLModel):
+class TodoUpdate(BaseModel):
     description: Optional[str] = None
     completed: Optional[bool] = None
     due_date: Optional[datetime] = None
