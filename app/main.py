@@ -4,8 +4,11 @@ from sqlmodel import SQLModel,Session, select
 from db import engine
 from auth import create_token, verify_token
 from models import User,UserCreate, UserRead, UserLogin, Todo,TodoCreate,TodoRead, TodoUpdate
+#imports for pagination
+from fastapi_pagination import Page, add_pagination
+from fastapi_pagination.ext.sqlmodel import paginate
 app = FastAPI()
-
+add_pagination(app)
 @app.get("/")
 async def root():
     return {"message":"Hello world"}
@@ -76,7 +79,7 @@ async def login(user: UserLogin, db : Session = Depends(create_session)):
 security = HTTPBearer()
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security),
-                     db : Session = Depends(create_session)
+                    db : Session = Depends(create_session)
                     ):
     token = credentials.credentials
 
@@ -95,17 +98,22 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid token")    
 
-@app.get("/todos" ,response_model=list[TodoRead])
+
+
+#paginated api
+@app.get("/todos", response_model=Page[TodoRead])
 async def get_todos(
-    db : Session = Depends(create_session),
+    db: Session = Depends(create_session),
     current_user: User = Depends(get_current_user),
-):
-    
-    statement = select(Todo).where(Todo.owner_id == current_user.id).order_by(Todo.created_at.desc())
-    todos = db.exec(statement).all()
+) -> Page[TodoRead]:
 
-    return todos
+    statement = (
+        select(Todo)
+        .where(Todo.owner_id == current_user.id)
+        .order_by(Todo.created_at.desc())
+    )
 
+    return paginate(db, statement)
 
 @app.post("/todos", response_model=TodoRead, status_code =201)
 async def create_todo(
